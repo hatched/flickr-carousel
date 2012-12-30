@@ -1,0 +1,7 @@
+.yui3-flickr-carousel-content {
+    white-space: nowrap;
+}
+.yui3-flickr-carousel-content li {
+    display: inline-block;
+    text-align: center
+}
