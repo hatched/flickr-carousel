@@ -30,6 +30,29 @@ YUI.add('flickr-carousel', function(Y) {
          */
         imageTemplate: '<li class="img-container" style="width: {width}"><img src="{src}" alt="{title}" width="{imgWidth}" height="{imgHeight}"></li>',
 
+        /*
+         * Template used for the naviagte left overlay
+         *
+         * @property prevNavTemplate
+         * @public
+         */
+        prevNavTemplate: '<div class="navigate prev"></div>',
+
+        /*
+         * Template used for the naviagte right overlay
+         *
+         * @property nextNavTemplate
+         * @public
+         */
+        nextNavTemplate: '<div class="navigate next"></div>',
+
+        /*
+         * Sets up the flickr data handler and plugs the pagination plugin
+         *
+         * @method initializer
+         * @param cfg {object} Module configuration object
+         * @private
+         */
         initializer: function(cfg) {
             YUI.flickrCarousel.handleResponse = Y.bind(this._handleResponse, this);
 
@@ -44,6 +67,8 @@ YUI.add('flickr-carousel', function(Y) {
          * Grabs the image data from Flickr
          *
          * @method fetchCarouselImages
+         * @param apiKey {string} flickr API Key
+         * @param photosetId {string} flickr photoset Id
          * @public
          */
         fetchCarouselImages: function(apiKey, photosetId) {
@@ -63,9 +88,37 @@ YUI.add('flickr-carousel', function(Y) {
         },
 
         /*
+         * Advances the carousel image depending on the button pressed
+         *
+         * @method _handleCarouselNavigate:
+         * @protected
+         * @param e {object} navigate click event object
+         */
+        _handleCarouselNavigate: function(e) {
+            Y.log('_handleCarouselNavigate:', 'info', this.name);
+
+            (e.currentTarget.hasClass('next')) ? this.next() : this.prev();
+        },
+
+        /*
+         * Generates the navigation controls for the carousel
+         *
+         * @method _generateCarouselControls
+         * @protected
+         */
+        _generateCarouselControls: function() {
+            Y.log('_generateCarouselControls', 'info', this.name);
+            var node = this.get('boundingBox');
+
+            node.append(this.prevNavTemplate);
+            node.append(this.nextNavTemplate);
+        },
+
+        /*
          * The jsonp callback from the flickr api
          *
          * @method _handleResponse
+         * @param response {object} flickr api response object
          * @private
          */
         _handleResponse: function(response) {
@@ -78,14 +131,12 @@ YUI.add('flickr-carousel', function(Y) {
                 elements = "",
                 i;
 
-            this._generateCarouselControls();
-            
             for (i = 0; i < photos.length; i++) {
                 var photo = photos[i];
                 elements += sub(this.imageTemplate, {
                     width: this.get('width'),
                     src: photo[photoSizeParam],
-                    title: photo['title'],
+                    title: photo.title,
                     imgWidth: photo.width_m, //these will need to be converted to attributes so that we can use a dynamic size
                     imgHeight: photo.height_m
                 });
@@ -94,46 +145,134 @@ YUI.add('flickr-carousel', function(Y) {
             node.setHTML(carousel);
 
             this.render();
+
+            this._generateCarouselControls();
         },
 
-        /*
-         * Generates the navigation controls for the carousel
-         *
-         * @method _generateCarouselControls
-         * @protected
-         */
-        _generateCarouselControls: function() {
-            Y.log('_generateCarouselControls', 'info', this.name);
-            var node = this.get('srcNode');
+        bindUI: function() {
+            Y.log('bindUI', 'info', this.name);
+            //Call the parent bindUI method
+            Y.FlickrCarousel.superclass.bindUI.apply(this);
+            var events = this.get('_events');
+            events.push(this.get('boundingBox').delegate('click', this._handleCarouselNavigate, '.navigate', this.pages));
         },
 
-        destructor: function() {}
+        destructor: function() {
+            Y.log('destructor', 'info', this.name);
+            this.get('_events').each(function(event) {
+                event.detach();
+            });
+        }
 
     }, {
         ATTRS: {
+
             /*
              * Flickr api key
              *
              * @attribute apiKey
              * @public
+             * @type string
              */
             apiKey: {},
+
             /*
              * Flickr photoset id
              *
              * @attribute photosetId
              * @public
+             * @type string
              */
             photosetId: {},
+
+            /*
+             * Weather the carousel should automatically advance
+             *
+             * @attribute autoAdvance
+             * @public
+             * @type boolean
+             * @default true
+             */
+            autoAdvance: {
+                value: true
+            },
+
+            /*
+             * Amount of time to wait before the autoadvance starts
+             *
+             * @attribute startDelay
+             * @public
+             * @type integer
+             * @default 3000
+             */
+            startDelay: {
+                value: 3000
+            },
+
+            /*
+             * Amount of time to wait between autoadvances
+             *
+             * @attribute advanceDelay
+             * @public
+             * @type integer
+             * @default 3000
+             */
+            advanceDelay: {
+                value: 3000
+            },
+
+            /*
+             * Disables the native flick gesture support
+             *
+             * Set to the following to restore default flick support
+             * {
+             *   minDistance: 10,
+             *   minVelocity: 0.3
+             * }
+             *
+             * @attribute flick
+             * @public
+             * @type boolean
+             * @default false
+             */
+            flick: {
+                value: false
+            },
+
+            /*
+             * Disables the native drag gesture support
+             *
+             * @attribute drag
+             * @public
+             * @type boolean
+             * @default false
+             */
+            drag: {
+                value: false
+            },
+
             /*
              * The param of the photo size sent to the flickr api
+             *
              * @attribute _photoSizeParam
              * @protected
              * @default 'url_m'
-             * @type String
+             * @type string
              */
             _photoSizeParam: {
                 value: 'url_m'
+            },
+
+            /*
+             * Collection of event handlers to detach on destroy
+             *
+             * @attribute _events
+             * @private
+             * @default []
+             * @type array
+             */
+            _events: {
+                value: []
             }
 
         }

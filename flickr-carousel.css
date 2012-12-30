@@ -5,3 +5,18 @@
     display: inline-block;
     text-align: center
 }
+.yui3-flickr-carousel .navigate {
+    width: 50%;
+    height: 100%;
+    top: 0px;
+    position: absolute;
+    cursor: pointer;
+}
+
+.yui3-flickr-carousel .navigate.prev {
+    left: 0px;
+}
+
+.yui3-flickr-carousel .navigate.next {
+    right: 0px;
+}
