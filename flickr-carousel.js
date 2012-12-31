@@ -47,6 +47,26 @@ YUI.add('flickr-carousel', function(Y) {
         nextNavTemplate: '<div class="navigate next"></div>',
 
         /*
+         * Sequencial photo size to key map
+         *
+         * @property _photoSizeToKeyUrl
+         * @private
+         * @type array
+         */
+        _photoSizeToKeyUrl: [
+            { key: 'sq', x: 75, y: 75 },
+            { key: 't', x: 100, y: 75 },
+            { key: 'q', x: 150, y: 150 },
+            { key: 's', x: 240, y: 180 },
+            { key: 'n', x: 320, y: 240 },
+            { key: 'm', x: 500, y: 375 },
+            { key: 'z', x: 640, y: 480 },
+            { key: 'c', x: 800, y: 600 },
+            { key: 'l', x: 1024, y: 768 },
+            { key: 'o', x: 2400, y: 1800 }
+        ],
+
+        /*
          * Sets up the flickr data handler and plugs the pagination plugin
          *
          * @method initializer
@@ -60,7 +80,37 @@ YUI.add('flickr-carousel', function(Y) {
                 selector: 'li'
             });
 
+            this.determinePhotoSize();
+
             this.fetchCarouselImages(cfg.apiKey, cfg.photosetId);
+        },
+
+        /*
+         * Sets the proper url size key for the flickr
+         * api to match the size of the carousel
+         *
+         * @method determinePhotoSize
+         * @public
+         */
+        determinePhotoSize: function() {
+            Y.log('determinePhotoSize', 'info', this.name);
+            var width = parseInt(this.get('width'), 10),
+                photoSizeToKeyUrl = this._photoSizeToKeyUrl,
+                sizeKey;
+
+            Y.Array.some(photoSizeToKeyUrl, function(size) {
+                if (size.x >= width) {
+                    sizeKey = size.key;
+                    return true;
+                }
+            }, this);
+
+            // If the carousel width is larger than the largest url tag
+            if (!sizeKey) {
+                sizeKey = photoSizeToKeyUrl[photoSizeToKeyUrl.length].key;
+            }
+
+            this.set('_photoSizeParam', sizeKey);
         },
 
         /*
@@ -90,12 +140,12 @@ YUI.add('flickr-carousel', function(Y) {
         /*
          * Advances the carousel image depending on the button pressed
          *
-         * @method _handleCarouselNavigate:
+         * @method _handleCarouselNavigate
          * @protected
          * @param e {object} navigate click event object
          */
         _handleCarouselNavigate: function(e) {
-            Y.log('_handleCarouselNavigate:', 'info', this.name);
+            Y.log('_handleCarouselNavigate', 'info', this.name);
 
             (e.currentTarget.hasClass('next')) ? this.next() : this.prev();
         },
@@ -128,17 +178,28 @@ YUI.add('flickr-carousel', function(Y) {
                 node = this.get('srcNode'),
                 photoSizeParam = this.get('_photoSizeParam'),
                 carousel = Y.Node.create(this.imageCarouselTemplate),
+                sizeParam = photoSizeParam.split('_')[1],
+                carouselWidth = this.get('width'),
                 elements = "",
-                i;
+                photo, photoWidth, photoHeight, i;
 
             for (i = 0; i < photos.length; i++) {
-                var photo = photos[i];
+                photo = photos[i];
+                photoWidth = photo['width_' + sizeParam];
+                photoHeight = photo['height_' + sizeParam];
+
+                // If the image needs to be downsized to fit into the carousel
+                if (photoWidth > carouselWidth) {
+                    photoWidth = carouselWidth;
+                    photoHeight = photoHeight * (carouselWidth / photoWidth);
+                }
+
                 elements += sub(this.imageTemplate, {
                     width: this.get('width'),
                     src: photo[photoSizeParam],
                     title: photo.title,
-                    imgWidth: photo.width_m, //these will need to be converted to attributes so that we can use a dynamic size
-                    imgHeight: photo.height_m
+                    imgWidth: photoWidth,
+                    imgHeight: photoHeight
                 });
             }
             carousel.setHTML(elements);
@@ -149,14 +210,28 @@ YUI.add('flickr-carousel', function(Y) {
             this._generateCarouselControls();
         },
 
+        /*
+         * Binds the navigate event listeners
+         *
+         * @method bindUI
+         * @private
+         */
         bindUI: function() {
             Y.log('bindUI', 'info', this.name);
+
             //Call the parent bindUI method
             Y.FlickrCarousel.superclass.bindUI.apply(this);
+
             var events = this.get('_events');
             events.push(this.get('boundingBox').delegate('click', this._handleCarouselNavigate, '.navigate', this.pages));
         },
 
+        /*
+         * Detaches events attached during instantiation
+         *
+         * @method destructor
+         * @private
+         */
         destructor: function() {
             Y.log('destructor', 'info', this.name);
             this.get('_events').each(function(event) {
@@ -260,7 +335,10 @@ YUI.add('flickr-carousel', function(Y) {
              * @type string
              */
             _photoSizeParam: {
-                value: 'url_m'
+                value: 'url_m',
+                setter: function(value) {
+                    return 'url_' + value;
+                }
             },
 
             /*
