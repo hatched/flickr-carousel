@@ -8,6 +8,7 @@ Notes
 *   To enable flick and drag support set them back to their original values on instantiation
 *   It will automatically pick the best size photo to request from flickr to fit the carousel container
 *   If the photo size doesn't exist on flickr it will 404 and that photo will not be shown
+*   If the users mouse is hovering on the carousel it will not autoadvance
 
 Dependencies
 ------------

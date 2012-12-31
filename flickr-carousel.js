@@ -210,6 +210,34 @@ YUI.add('flickr-carousel', function(Y) {
             this._generateCarouselControls();
         },
 
+        _checkForAutoAdvance: function() {
+            Y.log('_checkForAutoAdvance', 'info', this.name);
+            var pages = this.pages;
+
+            if (this.get('autoAdvance') === true) {
+                Y.later(this.get('startDelay'), this, function() {
+                    if (this.get('pauseOnHover') !== true) {
+                        pages.next();
+                    }
+                    Y.later(this.get('advanceDelay'), this, function() {
+                        if (this.get('pauseOnHover') !== true) {
+                            (pages.get('index') < pages.get('total')-1) ? pages.next() : pages.scrollToIndex(1);
+                        }
+                    }, null, true);
+                });
+            }
+        },
+
+        /*
+         * @method _pauseAutoAdvance
+         * @public
+         * @param e {object} mouseout or mouseover event object
+         */
+        _pauseAutoAdvance: function(e) {
+            Y.log('pauseAutoAdvance', 'info', this.name);
+            (e.type === "mouseenter") ? this.set('pauseOnHover', true) : this.set('pauseOnHover', false);
+        },
+
         /*
          * Binds the navigate event listeners
          *
@@ -222,8 +250,12 @@ YUI.add('flickr-carousel', function(Y) {
             //Call the parent bindUI method
             Y.FlickrCarousel.superclass.bindUI.apply(this);
 
-            var events = this.get('_events');
-            events.push(this.get('boundingBox').delegate('click', this._handleCarouselNavigate, '.navigate', this.pages));
+            var events = this.get('_events'),
+                boundingBox = this.get('boundingBox');
+            events.push(boundingBox.delegate('click', this._handleCarouselNavigate, '.navigate', this.pages));
+            events.push(this.after('render', this._checkForAutoAdvance, this));
+            events.push(boundingBox.on('mouseenter', this._pauseAutoAdvance, this));
+            events.push(boundingBox.on('mouseleave', this._pauseAutoAdvance, this));
         },
 
         /*
@@ -294,6 +326,18 @@ YUI.add('flickr-carousel', function(Y) {
              */
             advanceDelay: {
                 value: 3000
+            },
+
+            /*
+             * If the carousel should pause then the user hovers on it
+             *
+             * @attribute pauseOnHover
+             * @public
+             * @type boolean
+             * @default false
+             */
+            pauseOnHover: {
+                value: false
             },
 
             /*
