@@ -4,6 +4,17 @@ YUI.add('flickr-carousel', function(Y) {
 
     var sub = Y.Lang.sub;
 
+    /*
+     * The YUI Flickr Carousel is designed to allow you to easily include a flickr 
+     * photo set in a photo carousel on your website. It extends Y.ScrollView but 
+     * disables the flick and drag gestures by default in favour of 
+     * click-to-advance and auto-advance navigation.
+     *
+     * @class FlickrCarousel
+     * @module flickr-carousel
+     * @extends ScrollView
+     * @constructor
+     */
     Y.FlickrCarousel = new Y.Base.create('flickr-carousel', Y.ScrollView, [], {
 
         /*
@@ -210,6 +221,12 @@ YUI.add('flickr-carousel', function(Y) {
             this._generateCarouselControls();
         },
 
+        /*
+         * Checks to see if autoadvance is set then sets up the timeouts
+         *
+         * @method _checkForAutoAdvance
+         * @private
+         */
         _checkForAutoAdvance: function() {
             Y.log('_checkForAutoAdvance', 'info', this.name);
             var pages = this.pages;
@@ -230,7 +247,7 @@ YUI.add('flickr-carousel', function(Y) {
 
         /*
          * @method _pauseAutoAdvance
-         * @public
+         * @private
          * @param e {object} mouseout or mouseover event object
          */
         _pauseAutoAdvance: function(e) {
@@ -400,4 +417,4 @@ YUI.add('flickr-carousel', function(Y) {
         }
     });
 
-}, '0.1', { requires: ['scrollview', 'scrollview-paginator', 'base-build', 'get']});
+}, '0.1', { requires: ['scrollview', 'scrollview-paginator', 'base-build', 'get', 'event-mouseenter']});
