@@ -31,4 +31,10 @@ new Y.FlickrCarousel({
 });
 ```
 
+To Do
+_____
+*   Emit image change event with image data
+*   Vertical carousel support
+*   Add thumbnail mini carousel support
+
 Feature request, bug reports and pull requests welcome!
