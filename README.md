@@ -36,5 +36,6 @@ To Do
 *   Emit image change event with image data
 *   Vertical carousel support
 *   Add thumbnail mini carousel support
+*   Lazy loading images
 
 Feature request, bug reports and pull requests welcome!
