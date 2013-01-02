@@ -1,0 +1,11 @@
+{
+    "name"       : "gallery-flickr-carousel",
+    "displayName": "Gallery: gallery-flickr-carousel",
+    "description": "*Summary Goes Here*",
+    "author"     : [ "hatch" ],
+    "use"        : [ "gallery-flickr-carousel" ],
+
+    "tags": [ "gallery" ],
+
+    "examples": []
+}

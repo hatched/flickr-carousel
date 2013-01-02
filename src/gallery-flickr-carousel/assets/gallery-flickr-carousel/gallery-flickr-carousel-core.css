@@ -1,0 +1,23 @@
+.yui3-gallery-flickr-carousel-content {
+    white-space: nowrap;
+}
+.yui3-gallery-flickr-carousel-content li {
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+}
+.yui3-gallery-flickr-carousel .navigate {
+    width: 50%;
+    height: 100%;
+    top: 0;
+    position: absolute;
+    cursor: pointer;
+}
+
+.yui3-gallery-flickr-carousel .navigate.prev {
+    left: 0;
+}
+
+.yui3-gallery-flickr-carousel .navigate.next {
+    right: 0;
+}

@@ -1,0 +1,8 @@
+{
+    "gallery-flickr-carousel": {
+        "requires": [
+            "scrollview", "scrollview-paginator", "base-build", "jsonp", "event-mouseenter"
+        ],
+        "skinnable": false
+    }
+}
