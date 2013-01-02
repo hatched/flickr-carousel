@@ -1,7 +1,5 @@
 YUI.add('flickr-carousel', function(Y) {
 
-    YUI.namespace('flickrCarousel');
-
     var sub = Y.Lang.sub;
 
     /*
@@ -23,7 +21,7 @@ YUI.add('flickr-carousel', function(Y) {
          * @property flickrUrl
          * @protected
          */
-        _flickrUrl: 'http://api.flickr.com/services/rest/?method=flickr.photosets.getPhotos&api_key={apiKey}&photoset_id={photosetId}&extras={size},description&format=json&jsoncallback=YUI.flickrCarousel.handleResponse',
+        _flickrUrl: 'http://api.flickr.com/services/rest/?method=flickr.photosets.getPhotos&api_key={apiKey}&photoset_id={photosetId}&extras={size},description&format=json',
 
         /*
          * Image carousel container template
@@ -85,8 +83,6 @@ YUI.add('flickr-carousel', function(Y) {
          * @private
          */
         initializer: function(cfg) {
-            YUI.flickrCarousel.handleResponse = Y.bind(this._handleResponse, this);
-
             this.plug(Y.Plugin.ScrollViewPaginator, { 
                 selector: 'li'
             });
@@ -140,12 +136,8 @@ YUI.add('flickr-carousel', function(Y) {
                     photosetId: photosetId,
                     size: this.get('_photoSizeParam')
                 });
-            Y.Get.script(url, function(err) {
-                if (err) {
-                    Y.log('Error fetching images', 'error', this.name);
-                    Y.log(err);
-                }
-            });
+            url += "&jsoncallback={callback}";
+            Y.jsonp(url, Y.bind(this._handleResponse, this));
         },
 
         /*
@@ -417,4 +409,4 @@ YUI.add('flickr-carousel', function(Y) {
         }
     });
 
-}, '0.1', { requires: ['scrollview', 'scrollview-paginator', 'base-build', 'get', 'event-mouseenter']});
+}, '0.1.1', { requires: ['scrollview', 'scrollview-paginator', 'base-build', 'jsonp', 'event-mouseenter']});
