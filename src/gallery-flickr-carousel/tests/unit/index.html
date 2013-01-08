@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+<head>
+    <title>gallery-flickr-carousel</title>
+    <script src="/build/yui/yui.js"></script>
+    <script src="js/tests.js"></script>
+    <link rel="stylesheet" href="../../../../build/gallery-flickr-carousel/assets/gallery-flickr-carousel/gallery-flickr-carousel-core.css"></link>
+    <meta charset="utf-8" />
+</head>
+<body class="yui3-skin-sam">
+<div id="logger"></div>
+<div class="main-carousel"></div>
+
+<script>
+YUI({
+    coverage: ['gallery-flickr-carousel'],
+    filter: (window.location.search.match(/[?&]filter=([^&]+)/) || [])[1] || 'raw'
+}).use('test-console', 'test', 'module-tests', 'gallery-flickr-carousel', function(Y) {
+    
+    (new Y.Test.Console()).render('#logger');
+
+    Y.Test.Runner.setName('gallery-flickr-carousel');
+    Y.Test.Runner.run();
+});
+</script>
+</body>
+</html>
