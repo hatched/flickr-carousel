@@ -5,7 +5,7 @@ var sub = Y.Lang.sub;
   photo set in a photo carousel on your website. It extends Y.ScrollView but
   disables the flick and drag gestures by default in favour of
   click-to-advance and auto-advance navigation.
- 
+
   @class FlickrCarousel
   @module gallery-flickr-carousel
   @extends ScrollView
@@ -57,6 +57,15 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
       @type string
     */
     nextNavTemplate: '<div class="navigate next"></div>',
+
+    /**
+      Template used for the photo descriptions
+
+      @property descriptionTemplate
+      @public
+      @type string
+    */
+    descriptionTemplate: '<div class="description">{description}</div>',
 
     /**
       Sequencial photo size to key map
@@ -152,12 +161,28 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
     */
     _handleCarouselNavigate: function(e) {
         Y.log('_handleCarouselNavigate', 'info', this.name);
+        var pages = this.pages;
 
-        (e.currentTarget.hasClass('next')) ? this.next() : this.prev();
+        (e.currentTarget.hasClass('next') === true) ? pages.next() : pages.prev();
+        this._advanceDescription();
     },
 
     /**
-      Generates the navigation controls for the carousel
+      Advances the description depending on the supplied delta
+
+      @method _advanceDescription
+      @protected
+      @param index {integer} advance to index value
+    */
+    _advanceDescription: function(index) {
+        Y.log('_advanceDescription', 'info', this.name);
+
+        if (index === undefined) { index = this.pages.get('index'); }
+        this.get('_descriptionNode').setHTML(this.get('photos')[index].description['_content']);
+    },
+
+    /**
+      Generates and appends the navigation controls for the carousel
 
       @method _generateCarouselControls
       @protected
@@ -168,6 +193,39 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
 
         node.append(this.prevNavTemplate);
         node.append(this.nextNavTemplate);
+    },
+
+    /**
+      Generates and appends the description element
+
+      @method _addDescriptionNode
+      @protected
+    */
+    _addDescriptionNode: function(description) {
+        Y.log('_addDescriptionNode', 'info', this.name);
+        var node = this.get('boundingBox'),
+            descriptionTemplate = sub(this.descriptionTemplate, {
+                description: description
+            }),
+            descriptionNode = Y.Node.create(descriptionTemplate);
+
+        this.set('_descriptionNode', descriptionNode);
+        node.append(descriptionNode);
+    },
+
+    /**
+      Advances the photo and description to the next appropriate value
+
+      @method _advanceImage
+      @protected
+    */
+    _advanceImage: function() {
+        Y.log('_advanceImage', 'info', this.name);
+        var pages = this.pages,
+            index = pages.get('index');
+
+        (index < pages.get('total')-1) ? pages.next() : pages.scrollToIndex(0);
+        this._advanceDescription();
     },
 
     /**
@@ -187,7 +245,9 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
             sizeParam = photoSizeParam.split('_')[1],
             carouselWidth = this.get('width'),
             elements = "",
-            photo, photoWidth, photoHeight, i;
+            photo, photoWidth, photoHeight, i, descriptionNode;
+
+        this.set('photos', photos);
 
         for (i = 0; i < photos.length; i++) {
             photo = photos[i];
@@ -214,6 +274,10 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
         this.render();
 
         this._generateCarouselControls();
+
+        if (this.get('showDescription') === true) {
+            this._addDescriptionNode(photos[0].description['_content']);
+        }
     },
 
     /**
@@ -224,16 +288,15 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
     */
     _checkForAutoAdvance: function() {
         Y.log('_checkForAutoAdvance', 'info', this.name);
-        var pages = this.pages;
 
         if (this.get('autoAdvance') === true) {
             Y.later(this.get('startDelay'), this, function() {
                 if (this.get('pauseOnHover') !== true) {
-                    pages.next();
+                    this._advanceImage();
                 }
                 Y.later(this.get('advanceDelay'), this, function() {
                     if (this.get('pauseOnHover') !== true) {
-                        (pages.get('index') < pages.get('total')-1) ? pages.next() : pages.scrollToIndex(1);
+                        this._advanceImage();
                     }
                 }, null, true);
             });
@@ -266,7 +329,7 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
 
         var events = this.get('_events'),
             boundingBox = this.get('boundingBox');
-        events.push(boundingBox.delegate('click', this._handleCarouselNavigate, '.navigate', this.pages));
+        events.push(boundingBox.delegate('click', this._handleCarouselNavigate, '.navigate', this));
         events.push(this.after('render', this._checkForAutoAdvance, this));
         events.push(boundingBox.on('mouseenter', this._pauseAutoAdvance, this));
         events.push(boundingBox.on('mouseleave', this._pauseAutoAdvance, this));
@@ -362,7 +425,7 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
             minDistance: 10,
             minVelocity: 0.3
           }
-        
+
           @attribute flick
           @public
           @type boolean
@@ -370,6 +433,30 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
         */
         flick: {
             value: false
+        },
+
+        /**
+          Photos data array
+
+          @attribute photos
+          @public
+          @type array
+          @default []
+        */
+        photos: {
+            value: []
+        },
+
+        /**
+          Show the photo description
+
+          @attribute showDescription
+          @public
+          @type boolean
+          @default true
+        */
+        showDescription: {
+            value: true
         },
 
         /**
@@ -397,6 +484,18 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
             setter: function(value) {
                 return 'url_' + value;
             }
+        },
+
+        /**
+          Cache of the description Node
+
+          @attribute _descriptionNode
+          @protected
+          @default {}
+          @type Y.Node
+        */
+        _descriptionNode: {
+            value: {}
         },
 
         /**
