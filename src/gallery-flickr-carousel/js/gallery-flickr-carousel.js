@@ -115,11 +115,12 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
         Y.log('determinePhotoSize', 'info', this.name);
         var width = parseInt(this.get('width'), 10),
             photoSizeToKeyUrl = this._photoSizeToKeyUrl,
-            sizeKey;
+            sizeKey, sizes;
 
         Y.Array.some(photoSizeToKeyUrl, function(size) {
             if (size.x >= width) {
                 sizeKey = size.key;
+                sizes = size;
                 return true;
             }
         }, this);
@@ -130,6 +131,7 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
         }
 
         this.set('_photoSizeParam', sizeKey);
+        this.set('photoSize', sizes);
     },
 
     /**
@@ -178,7 +180,7 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
         Y.log('_advanceDescription', 'info', this.name);
 
         if (index === undefined) { index = this.pages.get('index'); }
-        this.get('_descriptionNode').setHTML(this.get('photos')[index].description['_content']);
+        this.get('_descriptionNode').setHTML(this.get('photos')[index].description._content);
     },
 
     /**
@@ -189,10 +191,17 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
     */
     _generateCarouselControls: function() {
         Y.log('_generateCarouselControls', 'info', this.name);
-        var node = this.get('boundingBox');
+        var node = this.get('boundingBox'),
+            prevNav = Y.Node.create(this.prevNavTemplate),
+            nextNav = Y.Node.create(this.nextNavTemplate);
 
-        node.append(this.prevNavTemplate);
-        node.append(this.nextNavTemplate);
+        height = this.get('photoSize').y + "px";
+
+        prevNav.setStyle('height', height);
+        nextNav.setStyle('height', height);
+
+        node.append(prevNav);
+        node.append(nextNav);
     },
 
     /**
@@ -245,7 +254,7 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
             sizeParam = photoSizeParam.split('_')[1],
             carouselWidth = this.get('width'),
             elements = "",
-            photo, photoWidth, photoHeight, i, descriptionNode;
+            photo, photoWidth, photoHeight, i;
 
         this.set('photos', photos);
 
@@ -276,7 +285,7 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
         this._generateCarouselControls();
 
         if (this.get('showDescription') === true) {
-            this._addDescriptionNode(photos[0].description['_content']);
+            this._addDescriptionNode(photos[0].description._content);
         }
     },
 
@@ -469,6 +478,18 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
         */
         drag: {
             value: false
+        },
+
+        /**
+          An object containing the photo size details
+
+          @attribute photoSize
+          @public
+          @type object
+          @default {}
+        */
+        photoSize: {
+            value: {}
         },
 
         /**
