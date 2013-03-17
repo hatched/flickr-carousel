@@ -38,7 +38,10 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
       @public
       @type string
      */
-    imageTemplate: '<li class="img-container" style="width: {width}"><img src="{src}" alt="{title}" width="{imgWidth}" height="{imgHeight}">{prevNavTemplate}{nextNavTemplate}{descriptionTemplate}</li>',
+    imageTemplate: '<li class="img-container" style="width: {width}">' +
+        '<div class="image-wrapper">' +
+        '<img src="{src}" alt="{title}" width="{imgWidth}" height="{imgHeight}" />' +
+        '{prevNavTemplate}{nextNavTemplate}</div>{descriptionTemplate}</li>',
 
     /**
       Template used for the naviagte left overlay
@@ -166,21 +169,6 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
         var pages = this.pages;
 
         (e.currentTarget.hasClass('next') === true) ? pages.next() : pages.prev();
-        this._advanceDescription();
-    },
-
-    /**
-      Advances the description depending on the supplied delta
-
-      @method _advanceDescription
-      @protected
-      @param index {integer} advance to index value
-    */
-    _advanceDescription: function(index) {
-        Y.log('_advanceDescription', 'info', this.name);
-
-        if (index === undefined) { index = this.pages.get('index'); }
-        this.get('_descriptionNode').setHTML(this.get('photos')[index].description._content);
     },
 
     /**
@@ -195,7 +183,6 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
             index = pages.get('index');
 
         (index < pages.get('total')-1) ? pages.next() : pages.scrollToIndex(0);
-        this._advanceDescription();
     },
 
     /**
@@ -470,18 +457,6 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
             setter: function(value) {
                 return 'url_' + value;
             }
-        },
-
-        /**
-          Cache of the description Node
-
-          @attribute _descriptionNode
-          @protected
-          @default {}
-          @type Y.Node
-        */
-        _descriptionNode: {
-            value: {}
         },
 
         /**

@@ -14,12 +14,18 @@
     position: relative;
 }
 
+.yui3-gallery-flickr-carousel .image-wrapper {
+    position: relative;
+}
+
 .yui3-gallery-flickr-carousel .navigate {
     width: 50%;
     height: 100%;
     top: 0;
     position: absolute;
     cursor: pointer;
+    /* Makes the navigate overlays work in IE...seriously */
+    background-image: url("iehack:///");
 }
 
 .yui3-gallery-flickr-carousel .description {
