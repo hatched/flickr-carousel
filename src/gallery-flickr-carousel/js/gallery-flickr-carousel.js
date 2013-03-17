@@ -38,7 +38,7 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
       @public
       @type string
      */
-    imageTemplate: '<li class="img-container" style="width: {width}"><img src="{src}" alt="{title}" width="{imgWidth}" height="{imgHeight}">{descriptionTemplate}</li>',
+    imageTemplate: '<li class="img-container" style="width: {width}"><img src="{src}" alt="{title}" width="{imgWidth}" height="{imgHeight}">{prevNavTemplate}{nextNavTemplate}{descriptionTemplate}</li>',
 
     /**
       Template used for the naviagte left overlay
@@ -47,7 +47,7 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
       @public
       @type string
     */
-    prevNavTemplate: '<div class="navigate prev"></div>',
+    prevNavTemplate: '<div class="navigate prev" style="height: {height}"></div>',
 
     /**
       Template used for the naviagte right overlay
@@ -56,7 +56,7 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
       @public
       @type string
     */
-    nextNavTemplate: '<div class="navigate next"></div>',
+    nextNavTemplate: '<div class="navigate next" style="height: {height}"></div>',
 
     /**
       Template used for the photo descriptions
@@ -184,27 +184,6 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
     },
 
     /**
-      Generates and appends the navigation controls for the carousel
-
-      @method _generateCarouselControls
-      @protected
-    */
-    _generateCarouselControls: function() {
-        Y.log('_generateCarouselControls', 'info', this.name);
-        var node = this.get('boundingBox'),
-            prevNav = Y.Node.create(this.prevNavTemplate),
-            nextNav = Y.Node.create(this.nextNavTemplate);
-
-        height = this.get('photoSize').y + "px";
-
-        prevNav.setStyle('height', height);
-        nextNav.setStyle('height', height);
-
-        node.append(prevNav);
-        node.append(nextNav);
-    },
-
-    /**
       Advances the photo and description to the next appropriate value
 
       @method _advanceImage
@@ -235,6 +214,7 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
             carousel = Y.Node.create(this.imageCarouselTemplate),
             sizeParam = photoSizeParam.split('_')[1],
             carouselWidth = this.get('width'),
+            photoSizeY = this.get('photoSize').y + "px",
             elements = "",
             photo, photoWidth, photoHeight, i;
 
@@ -257,8 +237,14 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
                 title: photo.title,
                 imgWidth: photoWidth,
                 imgHeight: photoHeight,
+                prevNavTemplate: sub(this.prevNavTemplate, {
+                  height: photoSizeY
+                }),
+                nextNavTemplate: sub(this.nextNavTemplate, {
+                  height: photoSizeY
+                }),
                 descriptionTemplate: sub(this.descriptionTemplate, {
-                    description: photo.description._content
+                  description: photo.description._content
                 })
             });
         }
@@ -266,8 +252,6 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
         node.setHTML(carousel);
 
         this.render();
-
-        this._generateCarouselControls();
     },
 
     /**
