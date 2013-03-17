@@ -352,7 +352,7 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
     */
     destructor: function() {
         Y.log('destructor', 'info', this.name);
-        this.get('_events').each(function(event) {
+        Y.Array.each(this.get('_events'), function(event) {
             event.detach();
         });
     }
