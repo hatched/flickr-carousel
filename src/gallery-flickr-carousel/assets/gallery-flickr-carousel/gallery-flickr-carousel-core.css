@@ -4,6 +4,7 @@
 
 .yui3-gallery-flickr-carousel-content ul {
     margin: 0;
+    -webkit-padding-start: 0;
 }
 
 .yui3-gallery-flickr-carousel-content li {
@@ -11,12 +12,30 @@
     text-align: center;
     vertical-align: middle;
 }
+
 .yui3-gallery-flickr-carousel .navigate {
     width: 50%;
     height: 100%;
     top: 0;
     position: absolute;
     cursor: pointer;
+}
+
+.yui3-gallery-flickr-carousel .description {
+    position: absolute;
+    bottom: 5px;
+    background: rgb(0,0,0);
+    background: rgba(0,0,0,0.5);
+    color: white;
+    padding: 5px 15px;
+    width: 470px;
+    white-space: normal;
+    overflow: hidden;
+    height: 25px;
+}
+
+.yui3-gallery-flickr-carousel .description:hover {
+    height: auto;
 }
 
 .yui3-gallery-flickr-carousel .navigate.prev {

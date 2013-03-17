@@ -38,7 +38,7 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
       @public
       @type string
      */
-    imageTemplate: '<li class="img-container" style="width: {width}"><img src="{src}" alt="{title}" width="{imgWidth}" height="{imgHeight}"></li>',
+    imageTemplate: '<li class="img-container" style="width: {width}"><img src="{src}" alt="{title}" width="{imgWidth}" height="{imgHeight}">{descriptionTemplate}</li>',
 
     /**
       Template used for the naviagte left overlay
@@ -205,24 +205,6 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
     },
 
     /**
-      Generates and appends the description element
-
-      @method _addDescriptionNode
-      @protected
-    */
-    _addDescriptionNode: function(description) {
-        Y.log('_addDescriptionNode', 'info', this.name);
-        var node = this.get('boundingBox'),
-            descriptionTemplate = sub(this.descriptionTemplate, {
-                description: description
-            }),
-            descriptionNode = Y.Node.create(descriptionTemplate);
-
-        this.set('_descriptionNode', descriptionNode);
-        node.append(descriptionNode);
-    },
-
-    /**
       Advances the photo and description to the next appropriate value
 
       @method _advanceImage
@@ -274,7 +256,10 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
                 src: photo[photoSizeParam],
                 title: photo.title,
                 imgWidth: photoWidth,
-                imgHeight: photoHeight
+                imgHeight: photoHeight,
+                descriptionTemplate: sub(this.descriptionTemplate, {
+                    description: photo.description._content
+                })
             });
         }
         carousel.setHTML(elements);
@@ -283,10 +268,6 @@ Y.FlickrCarousel = new Y.Base.create('gallery-flickr-carousel', Y.ScrollView, []
         this.render();
 
         this._generateCarouselControls();
-
-        if (this.get('showDescription') === true) {
-            this._addDescriptionNode(photos[0].description._content);
-        }
     },
 
     /**
